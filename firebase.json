@@ -1,0 +1,39 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "gideon-assistant-app",
+          "appId": "1:349759064384:android:51dd3cb8e312e5e01252a5",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "gideon-assistant-app",
+          "configurations": {
+            "android": "1:349759064384:android:51dd3cb8e312e5e01252a5",
+            "ios": "1:349759064384:ios:394b4c8b087c2b781252a5",
+            "macos": "1:349759064384:ios:394b4c8b087c2b781252a5",
+            "web": "1:349759064384:web:a3c220c7bb0284951252a5",
+            "windows": "1:349759064384:web:876ae605184a19c01252a5"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

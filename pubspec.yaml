@@ -1,0 +1,46 @@
+name: my_ai_app
+description: My AI application.
+publish_to: "none"
+
+version: 1.0.0+3
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  http: ^1.6.0
+  speech_to_text: ^7.3.0
+
+  cupertino_icons: ^1.0.8
+  flutter_tts: ^4.2.5
+  uuid: ^4.6.0
+  shared_preferences: ^2.5.5
+  in_app_purchase: ^3.3.0
+  url_launcher: ^6.3.2
+  firebase_core: ^4.14.0
+  firebase_auth: ^6.6.1
+  google_sign_in: ^7.2.0
+  image_picker: ^1.2.3
+  file_picker: ^12.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_launcher_icons: ^0.14.4
+
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/gideon_logo.png
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/gideon_logo.png"
+  min_sdk_android: 21

@@ -1917,7 +1917,7 @@ class ProScreen extends StatefulWidget {
 
 class _ProScreenState extends State<ProScreen> {
   static const String baseUrl =
-      'https://my-ai-server-3-se3x.onrender.com';
+    'https://my-ai-server-djeb.onrender.com';
 
   static const String _proProductId = 'gideon_pro_monthly';
 

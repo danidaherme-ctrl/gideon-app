@@ -4,12 +4,14 @@ class HomeDashboard extends StatefulWidget {
   final String token;
   final String email;
   final VoidCallback onLogout;
+  final VoidCallback onOpenChat;
 
   const HomeDashboard({
     super.key,
     required this.token,
     required this.email,
     required this.onLogout,
+    required this.onOpenChat,
   });
 
   @override
@@ -21,18 +23,16 @@ class _HomeDashboardState extends State<HomeDashboard> {
 
   String get _displayName {
     final name = widget.email.split('@').first.trim();
-    if (name.isEmpty) return 'there';
+
+    if (name.isEmpty) {
+      return 'there';
+    }
 
     return name[0].toUpperCase() + name.substring(1);
   }
 
   void _openChat() {
-    // We will connect this to the existing ChatScreen next.
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Chat is ready — connecting Gideon next.'),
-      ),
-    );
+    widget.onOpenChat();
   }
 
   void _selectAction(String action) {

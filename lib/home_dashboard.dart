@@ -4,7 +4,7 @@ class HomeDashboard extends StatefulWidget {
   final String token;
   final String email;
   final VoidCallback onLogout;
-  final VoidCallback onOpenChat;
+  final void Function([String? mode]) onOpenChat;
 
   const HomeDashboard({
     super.key,
@@ -23,49 +23,59 @@ class _HomeDashboardState extends State<HomeDashboard> {
 
   String get _displayName {
     final name = widget.email.split('@').first.trim();
-
-    if (name.isEmpty) {
-      return 'there';
-    }
-
+    if (name.isEmpty) return 'there';
     return name[0].toUpperCase() + name.substring(1);
   }
 
-  void _openChat() {
-    widget.onOpenChat();
-  }
+  void _openChat() => widget.onOpenChat();
 
-  void _selectAction(String action) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$action is ready.'),
-      ),
-    );
-  }
+void _openMode(String mode) {
+  widget.onOpenChat(mode);
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF070B14),
+      backgroundColor: const Color(0xFF070A10),
       body: SafeArea(
         child: Column(
           children: [
             _buildTopBar(),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildWelcome(),
-                    const SizedBox(height: 28),
-                    _buildAskGideon(),
-                    const SizedBox(height: 28),
-                    _buildQuickActions(),
-                    const SizedBox(height: 32),
-                    _buildRecentMissions(),
-                  ],
-                ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final wide = constraints.maxWidth >= 850;
+                  return SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: wide ? 48 : 20,
+                      vertical: 24,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1100),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildHero(),
+                          const SizedBox(height: 28),
+                          _buildSearchCard(),
+                          const SizedBox(height: 34),
+                          const Text(
+                            'Explore with Gideon',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          _buildModes(wide),
+                          const SizedBox(height: 34),
+                          _buildRecent(),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
             _buildBottomNavigation(),
@@ -76,62 +86,45 @@ class _HomeDashboardState extends State<HomeDashboard> {
   }
 
   Widget _buildTopBar() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Color(0xFF171D28))),
+      ),
       child: Row(
         children: [
           Container(
-            width: 42,
-            height: 42,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(13),
+              borderRadius: BorderRadius.circular(11),
               gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF4D7CFE),
-                  Color(0xFF8B5CF6),
-                ],
+                colors: [Color(0xFF5B7CFF), Color(0xFF8B5CF6)],
               ),
             ),
             child: const Icon(
               Icons.auto_awesome_rounded,
               color: Colors.white,
-              size: 22,
+              size: 20,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 11),
           const Text(
             'GIDEON',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 19,
+              fontSize: 18,
               fontWeight: FontWeight.w800,
-              letterSpacing: 2.2,
+              letterSpacing: 2,
             ),
           ),
           const Spacer(),
           IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Notifications coming soon.'),
-                ),
-              );
-            },
+            tooltip: 'Account',
+            onPressed: widget.onLogout,
             icon: const Icon(
-              Icons.notifications_none_rounded,
+              Icons.person_outline_rounded,
               color: Colors.white70,
-            ),
-          ),
-          const SizedBox(width: 2),
-          CircleAvatar(
-            radius: 19,
-            backgroundColor: const Color(0xFF151D30),
-            child: Text(
-              _displayName.substring(0, 1),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
             ),
           ),
         ],
@@ -139,7 +132,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
     );
   }
 
-  Widget _buildWelcome() {
+  Widget _buildHero() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -147,194 +140,77 @@ class _HomeDashboardState extends State<HomeDashboard> {
           'Good to see you, $_displayName.',
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 29,
+            fontSize: 30,
             fontWeight: FontWeight.w700,
             height: 1.15,
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 9),
         const Text(
-          'What are we working on today?',
-          style: TextStyle(
-            color: Colors.white60,
-            fontSize: 16,
-          ),
+          'Ask anything. Research deeply. Get things done.',
+          style: TextStyle(color: Colors.white54, fontSize: 16),
         ),
       ],
     );
   }
 
-  Widget _buildAskGideon() {
-    return GestureDetector(
+  Widget _buildSearchCard() {
+    return InkWell(
       onTap: _openChat,
+      borderRadius: BorderRadius.circular(24),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.fromLTRB(20, 19, 14, 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF101827),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: const Color(0xFF26344E),
-          ),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x33000000),
-              blurRadius: 25,
-              offset: Offset(0, 12),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    'Ask Gideon anything...',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  SizedBox(height: 7),
-                  Text(
-                    'Ideas, writing, coding, research and more.',
-                    style: TextStyle(
-                      color: Colors.white38,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF4D7CFE),
-                    Color(0xFF8B5CF6),
-                  ],
-                ),
-              ),
-              child: const Icon(
-                Icons.arrow_upward_rounded,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickActions() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'QUICK START',
-          style: TextStyle(
-            color: Colors.white38,
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.7,
-          ),
-        ),
-        const SizedBox(height: 13),
-        Row(
-          children: [
-            Expanded(
-              child: _actionCard(
-                icon: Icons.lightbulb_outline_rounded,
-                title: 'Ideas',
-                subtitle: 'Brainstorm',
-                onTap: () => _selectAction('Ideas'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _actionCard(
-                icon: Icons.edit_outlined,
-                title: 'Write',
-                subtitle: 'Create content',
-                onTap: () => _selectAction('Write'),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _actionCard(
-                icon: Icons.code_rounded,
-                title: 'Code',
-                subtitle: 'Build & debug',
-                onTap: () => _selectAction('Code'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _actionCard(
-                icon: Icons.search_rounded,
-                title: 'Research',
-                subtitle: 'Explore topics',
-                onTap: () => _selectAction('Research'),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _actionCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(19),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0E1523),
-          borderRadius: BorderRadius.circular(19),
-          border: Border.all(
-            color: const Color(0xFF202C42),
-          ),
+          color: const Color(0xFF10151F),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFF293346)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              icon,
-              color: const Color(0xFF8BA8FF),
-              size: 23,
+            const Row(
+              children: [
+                Icon(Icons.search_rounded, color: Colors.white38, size: 21),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Ask Gideon anything...',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  color: Colors.white38,
+                  size: 20,
+                ),
+              ],
             ),
-            const SizedBox(height: 17),
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: const TextStyle(
-                color: Colors.white38,
-                fontSize: 12,
-              ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                _miniAction(
+                  Icons.public_rounded,
+                  'Research',
+                  () => _openMode('Research'),
+                ),
+                const SizedBox(width: 8),
+                _miniAction(
+                  Icons.auto_awesome_rounded,
+                  'Deep Think',
+                  () => _openMode('Deep Think'),
+                ),
+                const SizedBox(width: 8),
+                _miniAction(
+                  Icons.attach_file_rounded,
+                  'Attach',
+                  _openChat,
+                ),
+              ],
             ),
           ],
         ),
@@ -342,175 +218,259 @@ class _HomeDashboardState extends State<HomeDashboard> {
     );
   }
 
-  Widget _buildRecentMissions() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Text(
-              'RECENT MISSIONS',
-              style: TextStyle(
-                color: Colors.white38,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.7,
-              ),
-            ),
-            const Spacer(),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _selectedIndex = 1;
-                });
-              },
-              child: const Text(
-                'View all',
-                style: TextStyle(
-                  color: Color(0xFF8BA8FF),
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(22),
+  Widget _miniAction(IconData icon, String label, VoidCallback onTap) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 10),
           decoration: BoxDecoration(
-            color: const Color(0xFF0B111D),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: const Color(0xFF1C273A),
-            ),
+            color: const Color(0xFF171D28),
+            borderRadius: BorderRadius.circular(12),
           ),
-          child: Column(
-            children: const [
-              Icon(
-                Icons.auto_awesome_outlined,
-                color: Colors.white24,
-                size: 28,
-              ),
-              SizedBox(height: 12),
-              Text(
-                'No recent missions',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(height: 5),
-              Text(
-                'Start a conversation with Gideon to begin.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white30,
-                  fontSize: 12,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 16, color: Colors.white60),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Colors.white60, fontSize: 11),
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildModes(bool wide) {
+    final cards = [
+      _modeCard(
+        Icons.public_rounded,
+        'Research',
+        'Search, analyze and synthesize information.',
+        () => _openMode('Research'),
+      ),
+      _modeCard(
+        Icons.edit_outlined,
+        'Write',
+        'Draft, rewrite and improve your content.',
+        () => _openMode('Write'),
+      ),
+      _modeCard(
+        Icons.code_rounded,
+        'Code',
+        'Build, explain and debug code with Gideon.',
+        () => _openMode('Code'),
+      ),
+      _modeCard(
+        Icons.lightbulb_outline_rounded,
+        'Ideas',
+        'Brainstorm concepts and explore possibilities.',
+        () => _openMode('Ideas'),
+      ),
+    ];
+
+    if (wide) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (int i = 0; i < cards.length; i++) ...[
+            Expanded(child: cards[i]),
+            if (i != cards.length - 1) const SizedBox(width: 12),
+          ],
+        ],
+      );
+    }
+
+    return Column(
+      children: [
+        Row(children: [
+          Expanded(child: cards[0]),
+          const SizedBox(width: 12),
+          Expanded(child: cards[1]),
+        ]),
+        const SizedBox(height: 12),
+        Row(children: [
+          Expanded(child: cards[2]),
+          const SizedBox(width: 12),
+          Expanded(child: cards[3]),
+        ]),
       ],
     );
   }
 
-  Widget _buildBottomNavigation() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
-      decoration: const BoxDecoration(
-        color: Color(0xFF080C15),
-        border: Border(
-          top: BorderSide(
-            color: Color(0xFF151E2D),
-          ),
+  Widget _modeCard(
+  IconData icon,
+  String title,
+  String subtitle,
+  VoidCallback onTap,
+) {
+  return InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(18),
+    child: Container(
+      height: 145,
+      padding: const EdgeInsets.all(17),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0E131C),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: const Color(0xFF202938),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _navItem(
-            icon: Icons.home_rounded,
-            label: 'Home',
-            index: 0,
+          Icon(
+            icon,
+            color: const Color(0xFF91A8FF),
+            size: 23,
           ),
-          _navItem(
-            icon: Icons.layers_outlined,
-            label: 'Missions',
-            index: 1,
+
+          const Spacer(),
+
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          _navItem(
-            icon: Icons.chat_bubble_outline_rounded,
-            label: 'Chat',
-            index: 2,
+
+          const SizedBox(height: 6),
+
+          Text(
+            subtitle,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white38,
+              fontSize: 12,
+              height: 1.35,
+            ),
           ),
-          _navItem(
-            icon: Icons.workspace_premium_outlined,
-            label: 'Pro',
-            index: 3,
+        ],
+      ),
+    ),
+  );
+}
+  Widget _buildRecent() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0B1018),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF1B2432)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.history_rounded, color: Colors.white30, size: 24),
+          const SizedBox(width: 14),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Recent conversations',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Your conversations will appear here.',
+                  style: TextStyle(color: Colors.white30, fontSize: 12),
+                ),
+              ],
+            ),
           ),
-          _navItem(
-            icon: Icons.person_outline_rounded,
-            label: 'Account',
-            index: 4,
+          TextButton(
+            onPressed: _openChat,
+            child: const Text(
+              'Open Chat',
+              style: TextStyle(color: Color(0xFF91A8FF)),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _navItem({
-    required IconData icon,
-    required String label,
-    required int index,
-  }) {
+  Widget _buildBottomNavigation() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 9, 12, 11),
+      decoration: const BoxDecoration(
+        color: Color(0xFF080C13),
+        border: Border(top: BorderSide(color: Color(0xFF171D28))),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _navItem(Icons.home_rounded, 'Home', 0, () {}),
+          _navItem(
+            Icons.public_rounded,
+            'Research',
+            1,
+            () => _openMode('Research'),
+          ),
+          _navItem(
+            Icons.chat_bubble_outline_rounded,
+            'Chat',
+            2,
+            _openChat,
+          ),
+          _navItem(
+            Icons.person_outline_rounded,
+            'Account',
+            3,
+            widget.onLogout,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _navItem(
+    IconData icon,
+    String label,
+    int index,
+    VoidCallback onTap,
+  ) {
     final selected = _selectedIndex == index;
-
-    return GestureDetector(
+    return InkWell(
       onTap: () {
-        setState(() {
-          _selectedIndex = index;
-        });
-
-        if (index == 2) {
-          _openChat();
-        }
+        setState(() => _selectedIndex = index);
+        onTap();
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 7,
-        ),
-        decoration: BoxDecoration(
-          color: selected
-              ? const Color(0xFF17233A)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
-        ),
+      borderRadius: BorderRadius.circular(14),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
               size: 20,
-              color: selected
-                  ? const Color(0xFF8BA8FF)
-                  : Colors.white38,
+              color: selected ? const Color(0xFF91A8FF) : Colors.white38,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                color: selected
-                    ? Colors.white
-                    : Colors.white38,
+                color: selected ? Colors.white : Colors.white38,
                 fontSize: 10,
-                fontWeight: selected
-                    ? FontWeight.w600
-                    : FontWeight.w400,
+                fontWeight:
+                    selected ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
           ],

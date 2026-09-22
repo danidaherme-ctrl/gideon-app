@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
@@ -515,7 +515,7 @@ class _AppGateState extends State<AppGate> {
     });
   }
 
-    @override
+   @override
   Widget build(BuildContext context) {
     if (_loading) {
       return const SplashScreen();
@@ -531,17 +531,18 @@ class _AppGateState extends State<AppGate> {
       token: _token!,
       email: _email ?? '',
       onLogout: _logout,
-      onOpenChat: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => ChatScreen(
-              token: _token!,
-              email: _email ?? '',
-              onLogout: _logout,
+     onOpenChat: ([String? mode]) {
+          Navigator.of(context).push(
+           MaterialPageRoute(
+             builder: (_) => ChatScreen(
+             token: _token!,
+             email: _email ?? '',
+             onLogout: _logout,
+             initialMode: mode,
             ),
-          ),
-        );
-      },
+            ),
+            );
+           },
     );
   }
 }
@@ -1928,7 +1929,7 @@ class ProScreen extends StatefulWidget {
 
 class _ProScreenState extends State<ProScreen> {
   static const String baseUrl =
-    'https://my-ai-server-djeb.onrender.com';
+      'https://my-ai-server-djeb.onrender.com';
 
   static const String _proProductId = 'gideon_pro_monthly';
 
@@ -2656,12 +2657,14 @@ class ChatScreen extends StatefulWidget {
   final String token;
   final String email;
   final Future<void> Function() onLogout;
+  final String? initialMode;
 
   const ChatScreen({
     super.key,
     required this.token,
     required this.email,
     required this.onLogout,
+    this.initialMode,
   });
 
   @override
@@ -3053,6 +3056,60 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
     );
   }
 
+Widget _buildEmptyChat() {
+  final mode = widget.initialMode;
+
+  String title = 'Ask Gideon anything';
+  String subtitle = 'Start a conversation with Gideon.';
+
+  if (mode == 'Research') {
+    title = 'Research with Gideon';
+    subtitle = 'Search the web and get answers with sources.';
+  } else if (mode == 'Write') {
+    title = 'Write with Gideon';
+    subtitle = 'Draft, rewrite and improve your content.';
+  } else if (mode == 'Code') {
+    title = 'Code with Gideon';
+    subtitle = 'Build, explain and debug your code.';
+  } else if (mode == 'Ideas') {
+    title = 'Ideas with Gideon';
+    subtitle = 'Brainstorm concepts and explore possibilities.';
+  }
+
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          GideonLogo(
+            size: 72,
+            radius: 20,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 15,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
   Future<void> _pickImage(ImageSource source) async {
     if (_sending) return;
 
@@ -3225,6 +3282,198 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
     return Icons.description_outlined;
   }
 
+
+  Future<void> _showResearchDialog() async {
+    if (_sending || !mounted) return;
+
+    final controller = TextEditingController();
+
+    final query = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF0E1A2A),
+          title: const Text(
+            '🔎 Research',
+            textAlign: TextAlign.right,
+          ),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            maxLines: 4,
+            maxLength: 4000,
+            textDirection: TextDirection.rtl,
+            decoration: const InputDecoration(
+              hintText: 'شو بدك Gideon يبحث عنه؟',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('إلغاء'),
+            ),
+            FilledButton.icon(
+              onPressed: () {
+                final value = controller.text.trim();
+                if (value.isEmpty) return;
+                Navigator.pop(dialogContext, value);
+              },
+              icon: const Icon(Icons.search_rounded),
+              label: const Text('ابدأ البحث'),
+            ),
+          ],
+        );
+      },
+    );
+
+    controller.dispose();
+
+    if (query == null || query.trim().isEmpty) return;
+    await _runResearch(suggestedQuery: query.trim());
+  }
+
+  Future<void> _runResearch({String? suggestedQuery}) async {
+    final query = (suggestedQuery ?? _messageController.text).trim();
+
+    if (query.isEmpty || _sending) return;
+
+    _messageController.clear();
+
+    if (_currentConversationId == null) {
+      try {
+        final response = await http
+            .post(
+              Uri.parse('$baseUrl/conversations'),
+              headers: _authHeaders,
+            )
+            .timeout(const Duration(seconds: 60));
+
+        if (response.statusCode == 401) {
+          await _handleUnauthorized();
+          return;
+        }
+
+        final data = jsonDecode(utf8.decode(response.bodyBytes));
+
+        if (response.statusCode != 201) {
+          throw Exception(
+            data['error']?.toString() ?? 'تعذر إنشاء المحادثة.',
+          );
+        }
+
+        final conversation = Conversation.fromJson(
+          Map<String, dynamic>.from(data['conversation']),
+        );
+
+        if (!mounted) return;
+
+        setState(() {
+          _currentConversationId = conversation.id;
+          _conversations.removeWhere((item) => item.id == conversation.id);
+          _conversations.insert(0, conversation);
+        });
+      } catch (_) {
+        if (!mounted) return;
+        _showMessage('تعذر إنشاء المحادثة. حاول مرة أخرى.');
+        return;
+      }
+    }
+
+    setState(() {
+      _messages.add(
+        ChatMessage(
+          text: '🔎 Research: $query',
+          isUser: true,
+        ),
+      );
+      _sending = true;
+    });
+
+    _scrollToBottom();
+
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/research'),
+            headers: _authHeaders,
+            body: jsonEncode({
+              'query': query,
+              'conversation_id': _currentConversationId,
+            }),
+          )
+          .timeout(const Duration(seconds: 180));
+
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
+
+      if (response.statusCode == 401) {
+        await _handleUnauthorized();
+        return;
+      }
+
+      final reply = data['reply']?.toString() ??
+          data['error']?.toString() ??
+          'حدث خطأ أثناء البحث.';
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        final returnedId = int.tryParse(
+          data['conversation_id']?.toString() ?? '',
+        );
+        final returnedTitle = data['conversation_title']?.toString();
+
+        setState(() {
+          if (returnedId != null) {
+            _currentConversationId = returnedId;
+          }
+
+          if (returnedId != null && returnedTitle != null) {
+            final index = _conversations.indexWhere(
+              (item) => item.id == returnedId,
+            );
+            if (index >= 0) {
+              _conversations[index].title = returnedTitle;
+            }
+          }
+
+          _messages.add(
+            ChatMessage(
+              text: reply,
+              isUser: false,
+            ),
+          );
+        });
+
+        await _loadConversations();
+      } else {
+        setState(() {
+          _messages.add(
+            ChatMessage(
+              text: reply,
+              isUser: false,
+            ),
+          );
+        });
+      }
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _messages.add(
+          ChatMessage(
+            text: 'تعذر تنفيذ البحث أو الاتصال بالسيرفر. تأكد من الإنترنت وحاول مرة أخرى.',
+            isUser: false,
+          ),
+        );
+      });
+    } finally {
+      if (mounted) {
+        setState(() => _sending = false);
+        _scrollToBottom();
+      }
+    }
+  }
 
   Future<void> _sendMessage({
     String? suggestedMessage,
@@ -4083,10 +4332,10 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
         child: Column(
           children: [
             Expanded(
-              child: _messages.isEmpty
-                  ? _buildWelcome()
-                  : _buildMessages(),
-            ),
+  child: _messages.isEmpty
+      ? _buildEmptyChat()
+      : _buildMessages(),
+),
             _buildInputArea(),
           ],
         ),
@@ -4185,9 +4434,12 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
 
           Directionality(
             textDirection: TextDirection.ltr,
-            child: Row(
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
               children: [
-                Expanded(
+                SizedBox(
+                  width: (MediaQuery.of(context).size.width - 50) / 4,
                   child: _buildModeCard(
                     icon: Icons.psychology_alt_rounded,
                     label: 'THINK',
@@ -4197,8 +4449,8 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
-                Expanded(
+                SizedBox(
+                  width: (MediaQuery.of(context).size.width - 50) / 4,
                   child: _buildModeCard(
                     icon: Icons.auto_awesome_rounded,
                     label: 'CREATE',
@@ -4208,8 +4460,8 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
                     ),
                   ),
                 ),
-                SizedBox(width: 10),
-                Expanded(
+                SizedBox(
+                  width: (MediaQuery.of(context).size.width - 50) / 4,
                   child: _buildModeCard(
                     icon: Icons.explore_rounded,
                     label: 'EXPLORE',
@@ -4217,6 +4469,15 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
                     onTap: () => _sendMessage(
                       suggestedMessage: 'أعطني موضوعًا مثيرًا أستكشفه اليوم.',
                     ),
+                  ),
+                ),
+                SizedBox(
+                  width: (MediaQuery.of(context).size.width - 50) / 4,
+                  child: _buildModeCard(
+                    icon: Icons.search_rounded,
+                    label: 'RESEARCH',
+                    subtitle: 'ابحث بالمصادر',
+                    onTap: _showResearchDialog,
                   ),
                 ),
               ],
@@ -4766,3 +5027,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
     );
   }
 }
+
+
+
+

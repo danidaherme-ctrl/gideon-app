@@ -314,31 +314,11 @@ class GideonApp extends StatefulWidget {
 class _GideonAppState extends State<GideonApp> {
   final GideonSettings _settings = GideonSettings.instance;
 
-  @override
-  void initState() {
-    super.initState();
-    _settings.load().then((_) {
-      if (mounted) setState(() {});
-    });
-  }
-
   ThemeData _theme(Brightness brightness) {
     return ThemeData(
       brightness: brightness,
       useMaterial3: true,
-      scaffoldBackgroundColor: brightness == Brightness.dark
-          ? const Color(0xFF07111F)
-          : const Color(0xFFF5F7FA),
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: _settings.accentColor,
-        brightness: brightness,
-      ),
-      appBarTheme: AppBarTheme(
-        backgroundColor: brightness == Brightness.dark
-            ? const Color(0xFF07111F)
-            : const Color(0xFFF5F7FA),
-        elevation: 0,
-      ),
+      // ...
     );
   }
 
@@ -348,25 +328,12 @@ class _GideonAppState extends State<GideonApp> {
       animation: _settings,
       builder: (context, _) {
         return MaterialApp(
-          title: 'Gideon',
-          debugShowCheckedModeBanner: false,
-          theme: _theme(Brightness.light),
-          darkTheme: _theme(Brightness.dark),
-          themeMode: _settings.themeMode,
-          builder: (context, child) {
-            return Directionality(
-              textDirection: _settings.language == 'English'
-                  ? TextDirection.ltr
-                  : TextDirection.rtl,
-              child: child ?? const SizedBox.shrink(),
-            );
-          },
-          home: const AppGate(),
+          // ...
         );
       },
     );
   }
-}
+} 
 
 // ============================================================
 // APP GATE
@@ -404,9 +371,7 @@ class _AppGateState extends State<AppGate> {
       });
 
       return;
-    }
-
-    // Verify token with backend.
+    }    // Verify token with backend.
     try {
       final response = await http
           .get(
@@ -527,22 +492,22 @@ class _AppGateState extends State<AppGate> {
       );
     }
 
-    return HomeDashboard(
+        return HomeDashboard(
       token: _token!,
       email: _email ?? '',
       onLogout: _logout,
-     onOpenChat: ([String? mode]) {
-          Navigator.of(context).push(
-           MaterialPageRoute(
-             builder: (_) => ChatScreen(
-             token: _token!,
-             email: _email ?? '',
-             onLogout: _logout,
-             initialMode: mode,
+      onOpenChat: ([String? mode]) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ChatScreen(
+              token: _token!,
+              email: _email ?? '',
+              onLogout: _logout,
+              initialMode: mode,
             ),
-            ),
-            );
-           },
+          ),
+        );
+      },
     );
   }
 }
@@ -1098,6 +1063,31 @@ class _AuthScreenState extends State<AuthScreen> {
                             : 'لديك حساب بالفعل؟ تسجيل الدخول',
                       ),
                     ),
+const SizedBox(height: 20),
+
+Wrap(
+  alignment: WrapAlignment.center,
+  spacing: 4,
+  runSpacing: 4,
+  children: [
+    TextButton(
+      onPressed: () => Navigator.pushNamed(context, '/pricing'),
+      child: const Text('Pricing'),
+    ),
+    TextButton(
+      onPressed: () => Navigator.pushNamed(context, '/terms'),
+      child: const Text('Terms of Service'),
+    ),
+    TextButton(
+      onPressed: () => Navigator.pushNamed(context, '/privacy'),
+      child: const Text('Privacy Policy'),
+    ),
+    TextButton(
+      onPressed: () => Navigator.pushNamed(context, '/refund'),
+      child: const Text('Refund Policy'),
+    ),
+  ],
+),
                   ],
                 ),
               ),
@@ -1557,6 +1547,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: Text('معلومات حول حماية حسابك'),
                   trailing: Icon(Icons.chevron_left_rounded),
                   onTap: _showPrivacy,
+                ),
+              ]),
+                            SizedBox(height: 18),
+              _sectionTitle('القانون والسياسات'),
+              _card([
+                ListTile(
+                  leading: Icon(Icons.description_outlined),
+                  title: Text('الشروط والأحكام'),
+                  subtitle: Text('Terms of Service'),
+                  trailing: Icon(Icons.chevron_left_rounded),
+                  onTap: () => Navigator.of(context).pushNamed('/terms'),
+                ),
+                Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.privacy_tip_outlined),
+                  title: Text('سياسة الخصوصية'),
+                  subtitle: Text('Privacy Policy'),
+                  trailing: Icon(Icons.chevron_left_rounded),
+                  onTap: () => Navigator.of(context).pushNamed('/privacy'),
+                ),
+                Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.receipt_long_outlined),
+                  title: Text('سياسة الاسترداد'),
+                  subtitle: Text('Refund Policy'),
+                  trailing: Icon(Icons.chevron_left_rounded),
+                  onTap: () => Navigator.of(context).pushNamed('/refund'),
+                ),
+                Divider(height: 1),
+                ListTile(
+                  leading: Icon(Icons.sell_outlined),
+                  title: Text('الأسعار'),
+                  subtitle: Text('Pricing'),
+                  trailing: Icon(Icons.chevron_left_rounded),
+                  onTap: () => Navigator.of(context).pushNamed('/pricing'),
                 ),
               ]),
               SizedBox(height: 18),
@@ -5027,7 +5052,242 @@ Widget _buildEmptyChat() {
     );
   }
 }
+// ============================================================
+// LEGAL SCREENS
+// ============================================================
 
+class TermsScreen extends StatelessWidget {
+  const TermsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(tr('الشروط والأحكام', 'Terms & Conditions')),
+      ),
+      body: const SingleChildScrollView(
+        padding: EdgeInsets.all(24),
+        child: Text(
+          'Terms & Conditions\n\n'
+          'By using Gideon, you agree to use the service lawfully and responsibly.\n\n'
+          'The service is provided subject to these terms. You are responsible '
+          'for maintaining the security of your account and for the activity '
+          'performed through your account.\n\n'
+          'Gideon may update these terms when necessary. Continued use of the '
+          'service after changes means that you accept the updated terms.',
+        ),
+      ),
+    );
+  }
+}
+
+class PrivacyScreen extends StatelessWidget {
+  const PrivacyScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(tr('سياسة الخصوصية', 'Privacy Policy')),
+      ),
+      body: const SingleChildScrollView(
+        padding: EdgeInsets.all(24),
+        child: Text(
+          'Privacy Policy\n\n'
+          'Gideon respects your privacy.\n\n'
+          'Information provided to the service may be processed to provide, '
+          'secure, maintain, and improve the application.\n\n'
+          'We take reasonable measures to protect information and do not '
+          'request information that is unnecessary for providing the service.',
+        ),
+      ),
+    );
+  }
+}
+
+class RefundScreen extends StatelessWidget {
+  const RefundScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(tr('سياسة الاسترداد', 'Refund Policy')),
+      ),
+      body: const SingleChildScrollView(
+        padding: EdgeInsets.all(24),
+        child: Text(
+          'Refund Policy\n\n'
+          'Refund requests are reviewed according to the applicable purchase '
+          'terms and payment provider rules.\n\n'
+          'If you believe you were charged incorrectly, please contact Gideon '
+          'with your transaction details so the request can be reviewed.',
+        ),
+      ),
+    );
+  }
+}
+class PricingScreen extends StatelessWidget {
+  const PricingScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          tr('الأسعار', 'Pricing'),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              tr('الأسعار والباقات', 'Pricing & Plans'),
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            Text(
+              tr(
+                'اختر الخطة المناسبة لاستخدامك في Gideon.',
+                'Choose the plan that fits your use of Gideon.',
+              ),
+              style: const TextStyle(
+                fontSize: 15,
+                height: 1.5,
+              ),
+            ),
+
+            const SizedBox(height: 28),
+
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Gideon Free',
+                      style: const TextStyle(
+                        fontSize: 21,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      tr(
+                        'الخطة المجانية لاستخدام Gideon.',
+                        'Free access to Gideon.',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Gideon Pro',
+                            style: TextStyle(
+                              fontSize: 21,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '\$4.99 / month',
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    Text(
+                      tr(
+                        'اشتراك شهري للحصول على مزايا Pro عند توفرها.',
+                        'Monthly subscription for Pro features as they become available.',
+                      ),
+                      style: const TextStyle(
+                        height: 1.5,
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    const Text('• Up to 200 messages per day'),
+                    const Text('• Advanced capabilities'),
+                    const Text('• Priority access to new features'),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 28),
+
+            Text(
+              tr(
+                'معلومات الدفع',
+                'Payment Information',
+              ),
+              style: const TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            Text(
+              tr(
+                'الأسعار قد تختلف حسب منصة الدفع والضرائب والعملة المحلية. '
+                'يظهر السعر النهائي قبل إتمام عملية الشراء.',
+                'Prices may vary depending on the payment platform, taxes, '
+                'and local currency. The final price is shown before purchase.',
+              ),
+              style: const TextStyle(
+                height: 1.5,
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            Text(
+              tr(
+                'للاطلاع على شروط الخدمة وسياسة الخصوصية والاسترداد، '
+                'يرجى مراجعة الصفحات القانونية الخاصة بـ Gideon.',
+                'For more information about the Terms of Service, Privacy Policy, '
+                'and Refund Policy, please review Gideon’s legal pages.',
+              ),
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 
 

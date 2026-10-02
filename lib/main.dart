@@ -376,7 +376,7 @@ class _AppGateState extends State<AppGate> {
       final response = await http
           .get(
             Uri.parse(
-              'https://my-ai-server-djeb.onrender.com',
+              'https://my-ai-server-3-se3x.onrender.com',
             ),
             headers: {
               'Authorization': 'Bearer $token',
@@ -579,7 +579,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   static const String baseUrl =
-      'https://my-ai-server-djeb.onrender.com';
+      'https://my-ai-server-3-se3x.onrender.com';
 
   final TextEditingController _emailController =
       TextEditingController();
@@ -1228,7 +1228,7 @@ class ChangePasswordDialog extends StatefulWidget {
 
 class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
   static const String _baseUrl =
-      'https://my-ai-server-djeb.onrender.com';
+      'https://my-ai-server-3-se3x.onrender.com';
 
   late final TextEditingController _currentController;
   late final TextEditingController _newController;
@@ -1954,7 +1954,7 @@ class ProScreen extends StatefulWidget {
 
 class _ProScreenState extends State<ProScreen> {
   static const String baseUrl =
-      'https://my-ai-server-djeb.onrender.com';
+      'https://my-ai-server-3-se3x.onrender.com';
 
   static const String _proProductId = 'gideon_pro_monthly';
 
@@ -2698,7 +2698,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateMixin {
   static const String baseUrl =
-      'https://my-ai-server-djeb.onrender.com';
+      'https://my-ai-server-3-se3x.onrender.com';
 
   final TextEditingController _messageController =
       TextEditingController();

@@ -24,6 +24,7 @@ String tr(String arabic, String english) {
       : arabic;
 }
 
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -40,7 +41,6 @@ Future<void> main() async {
 
   runApp(const GideonApp());
 }
-
 
 class GideonLogo extends StatelessWidget {
   final double size;
@@ -304,6 +304,7 @@ class GideonSettings extends ChangeNotifier {
   }
 }
 
+
 class GideonApp extends StatefulWidget {
   const GideonApp({super.key});
 
@@ -314,11 +315,82 @@ class GideonApp extends StatefulWidget {
 class _GideonAppState extends State<GideonApp> {
   final GideonSettings _settings = GideonSettings.instance;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    try {
+      await _settings.load();
+
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (error) {
+      debugPrint('Gideon settings could not be loaded: $error');
+    }
+  }
+
   ThemeData _theme(Brightness brightness) {
+    final isDark = brightness == Brightness.dark;
+
     return ThemeData(
-      brightness: brightness,
       useMaterial3: true,
-      // ...
+      brightness: brightness,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: _settings.accentColor,
+        brightness: brightness,
+      ),
+      scaffoldBackgroundColor: isDark
+          ? const Color(0xFF07111F)
+          : const Color(0xFFF5F7FB),
+      appBarTheme: AppBarTheme(
+        backgroundColor: isDark
+            ? const Color(0xFF07111F)
+            : const Color(0xFFF5F7FB),
+        foregroundColor: isDark ? Colors.white : Colors.black87,
+        elevation: 0,
+        centerTitle: false,
+      ),
+      cardTheme: CardThemeData(
+        elevation: 0,
+        color: isDark
+            ? const Color(0xFF101E30)
+            : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(
+            color: _settings.accentColor.withValues(
+              alpha: isDark ? 0.15 : 0.12,
+            ),
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: isDark
+            ? const Color(0xFF101E30)
+            : Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: _settings.accentColor.withValues(alpha: 0.20),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: _settings.accentColor,
+            width: 1.5,
+          ),
+        ),
+      ),
     );
   }
 
@@ -328,12 +400,17 @@ class _GideonAppState extends State<GideonApp> {
       animation: _settings,
       builder: (context, _) {
         return MaterialApp(
-          // ...
+          title: 'Gideon AI',
+          debugShowCheckedModeBanner: false,
+          theme: _theme(Brightness.light),
+          darkTheme: _theme(Brightness.dark),
+          themeMode: _settings.themeMode,
+          home: const AppGate(),
         );
       },
     );
   }
-} 
+}
 
 // ============================================================
 // APP GATE
@@ -1976,7 +2053,8 @@ class _ProScreenState extends State<ProScreen> {
   bool _storeLoading = true;
   bool _purchasePending = false;
   bool _storeAvailable = false;
-
+   bool _whishLoading = false;
+   String? _whishExternalId;
   @override
   void initState() {
     super.initState();
@@ -1998,6 +2076,141 @@ class _ProScreenState extends State<ProScreen> {
     _loadProduct();
     _loadStoreProduct();
   }
+
+Future<void> _payWithWhish() async {
+  if (_whishLoading) return;
+
+  if (widget.token.trim().isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('يرجى تسجيل الدخول أولًا.'),
+      ),
+    );
+    return;
+  }
+
+  setState(() => _whishLoading = true);
+
+  try {
+    final response = await http.post(
+      Uri.parse('$baseUrl/payments/whish/create'),
+      headers: {
+        'Authorization': 'Bearer ${widget.token}',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({}),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 201) {
+      throw Exception(
+        data is Map
+            ? (data['error'] ?? 'تعذّر إنشاء عملية الدفع.')
+            : 'تعذّر إنشاء عملية الدفع.',
+      );
+    }
+
+    final collectUrl = data['collectUrl']?.toString();
+    final externalId = data['externalId']?.toString();
+
+    if (collectUrl == null ||
+        collectUrl.isEmpty ||
+        externalId == null ||
+        externalId.isEmpty) {
+      throw Exception('بيانات الدفع غير مكتملة.');
+    }
+
+    setState(() {
+      _whishExternalId = externalId;
+    });
+
+    final opened = await launchUrl(
+      Uri.parse(collectUrl),
+      webOnlyWindowName: '_blank',
+    );
+
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('تعذّر فتح صفحة Whish Pay.'),
+        ),
+      );
+    }
+  } catch (e) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('خطأ في الدفع: $e'),
+        ),
+      );
+    }
+  } finally {
+    if (mounted) {
+      setState(() => _whishLoading = false);
+    }
+  }
+}
+
+Future<void> _verifyWhishPayment() async {
+  final externalId = _whishExternalId;
+  if (externalId == null || _whishLoading) return;
+
+  setState(() => _whishLoading = true);
+
+  try {
+    final response = await http.get(
+      Uri.parse(
+        '$baseUrl/payments/whish/status/'
+        '${Uri.encodeComponent(externalId)}',
+      ),
+      headers: {
+        'Authorization': 'Bearer ${widget.token}',
+      },
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        data is Map
+            ? (data['error'] ?? 'تعذّر التحقق من الدفع.')
+            : 'تعذّر التحقق من الدفع.',
+      );
+    }
+
+    final status = data['status']?.toString();
+
+    if (!mounted) return;
+final message = switch (status) {
+  'success' => 'تم تأكيد الدفع من الخادم بنجاح.',
+  'pending' => 'الدفع ما زال قيد الانتظار.',
+  'failed' => 'عملية الدفع لم تنجح.',
+  'refunded' => 'تم استرداد المبلغ.',
+  _ => 'حالة الدفع: ${status ?? 'غير معروفة'}',
+};
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+
+    if (status == 'success') {
+      await _loadProduct();
+    }
+  } catch (e) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('تعذّر التحقق: $e'),
+        ),
+      );
+    }
+  } finally {
+    if (mounted) {
+      setState(() => _whishLoading = false);
+    }
+  }
+}
+
 
   @override
   void dispose() {
@@ -2186,21 +2399,23 @@ class _ProScreenState extends State<ProScreen> {
   }
 
   String _channelStatus(String key, String fallback) {
-    final value = _product.paymentChannels[key]?.toString();
+  final value = _product.paymentChannels[key]?.toString();
 
-    if (value == null || value.isEmpty) return fallback;
+  if (value == null || value.isEmpty) return fallback;
 
-    switch (value) {
-      case 'coming_soon':
-        return 'قريبًا';
-      case 'pending_merchant_integration':
-        return 'قيد التجهيز';
-      case 'available':
-        return 'متاح';
-      default:
-        return fallback;
-    }
+  switch (value) {
+    case 'coming_soon':
+      return 'قريبًا';
+    case 'pending_merchant_integration':
+      return 'قيد التجهيز';
+    case 'available':
+      return 'متاح';
+    case 'available_in_sandbox':
+      return 'متاح للاختبار';
+    default:
+      return fallback;
   }
+}
 
   Widget _buildFeature({
     required IconData icon,
@@ -2270,7 +2485,8 @@ class _ProScreenState extends State<ProScreen> {
     required String title,
     required String status,
   }) {
-    final active = status == 'متاح';
+    final active =
+    status == 'متاح' || status == 'متاح للاختبار';
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -2620,15 +2836,57 @@ class _ProScreenState extends State<ProScreen> {
                   ),
                 ),
                 SizedBox(height: 9),
-                _buildPaymentChannel(
-                  icon: Icons.account_balance_wallet_outlined,
-                  title: 'Whish Pay',
-                  status: _channelStatus(
-                    'whish_pay',
-                    'قيد التجهيز',
-                  ),
-                ),
-                SizedBox(height: 20),
+     
+_buildPaymentChannel(
+  icon: Icons.account_balance_wallet_outlined,
+  title: 'Whish Pay',
+  status: _channelStatus(
+    'whish_pay',
+    'قيد التجهيز',
+  ),
+),
+
+if (_channelStatus('whish_pay', '') == 'متاح للاختبار') ...[
+  const SizedBox(height: 12),
+  SizedBox(
+    width: double.infinity,
+    height: 54,
+    child: FilledButton.icon(
+      onPressed: _whishLoading ? null : _payWithWhish,
+      icon: _whishLoading
+          ? const SizedBox(
+              width: 19,
+              height: 19,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+              ),
+            )
+          : const Icon(Icons.account_balance_wallet_outlined),
+      label: Text(
+        _whishLoading
+            ? 'جارٍ تنفيذ العملية...'
+            : 'الدفع عبر Whish Pay (Sandbox)',
+      ),
+    ),
+  ),
+
+  if (_whishExternalId != null) ...[
+    const SizedBox(height: 8),
+    SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: OutlinedButton.icon(
+        onPressed:
+            _whishLoading ? null : _verifyWhishPayment,
+        icon: const Icon(Icons.verified_outlined),
+        label: const Text('التحقق من حالة الدفع'),
+      ),
+    ),
+  ],
+],
+
+const SizedBox(height: 20),
+
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),

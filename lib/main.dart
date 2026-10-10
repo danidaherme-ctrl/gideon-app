@@ -2866,100 +2866,60 @@ final message = switch (status) {
                 ),
                 
                 
-_buildPaymentChannel(
-  icon: Icons.account_balance_wallet_outlined,
-  title: 'Whish Pay',
-  status: _channelStatus(
-    'whish_pay',
-    'قيد التجهيز',
-  ),
-),
 
-if (_channelStatus('whish_pay', '') == 'متاح للاختبار') ...[
-  const SizedBox(height: 12),
-  SizedBox(
-    width: double.infinity,
-    height: 54,
-    child: FilledButton.icon(
-      onPressed: _whishLoading ? null : _payWithWhish,
-      icon: _whishLoading
-          ? const SizedBox(
-              width: 19,
-              height: 19,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-              ),
-            )
-          : const Icon(Icons.account_balance_wallet_outlined),
-      label: Text(
-        _whishLoading
-            ? 'جارٍ تنفيذ العملية...'
-            : 'الدفع عبر Whish Pay (Sandbox)',
-      ),
-    ),
-  ),
-
-  if (_whishExternalId != null) ...[
-    const SizedBox(height: 8),
-    SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: OutlinedButton.icon(
-        onPressed:
-            _whishLoading ? null : _verifyWhishPayment,
-        icon: const Icon(Icons.verified_outlined),
-        label: const Text('التحقق من حالة الدفع'),
-      ),
-    ),
-  ],
-],
-
-const SizedBox(height: 20),
-
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.035),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.06),
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        Icons.shield_outlined,
-                        color: Color(0xFF5FE7FF),
-                        size: 22,
-                      ),
-                      SizedBox(width: 11),
-                      Expanded(
-                        child: Text(
-                          'الدفع الحقيقي رح يتم عبر قناة الدفع الرسمية، '
-                          'والـ backend هو مصدر الحقيقة لصلاحية Pro. '
-                          'ما رح نفعّل الاشتراك من داخل التطبيق بشكل غير آمن.',
-                          style: TextStyle(
-                            color: Colors.white
-                                .withValues(alpha: 0.56),
-                            fontSize: 12,
-                            height: 1.45,
-                          ),
-                        ),
-                      ),
-                    ],
+                _buildPaymentChannel(
+                  icon: Icons.account_balance_wallet_outlined,
+                  title: 'Whish Pay',
+                  status: _channelStatus(
+                    'whish_pay',
+                    'متاح',
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+
+                if (!_accountPlanLoading &&
+                    _accountPlan == 'FREE') ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: FilledButton.icon(
+                      onPressed:
+                          _whishLoading ? null : _payWithWhish,
+                      icon: _whishLoading
+                          ? const SizedBox(
+                              width: 19,
+                              height: 19,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.account_balance_wallet_outlined,
+                            ),
+                      label: Text(
+                        _whishLoading
+                            ? 'جارٍ تنفيذ العملية...'
+                            : 'الاشتراك عبر Whish Pay — \$4.99',
+                      ),
+                    ),
+                  ),
+                  if (_whishExternalId != null) ...[
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: OutlinedButton.icon(
+                        onPressed: _whishLoading
+                            ? null
+                            : _verifyWhishPayment,
+                        icon: const Icon(Icons.verified_outlined),
+                        label: const Text(
+                          'التحقق من حالة الدفع',
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
 
 // ============================================================
 // CHAT SCREEN

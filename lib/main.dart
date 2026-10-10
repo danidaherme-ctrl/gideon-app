@@ -2865,63 +2865,8 @@ final message = switch (status) {
                   subtitle:
                       'الوصول إلى الميزات الجديدة حسب توفرها.',
                 ),
-                SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: FilledButton.icon(
-                    onPressed: canPurchase
-                        ? _buyPro
-                        : (_purchasePending
-                            ? null
-                            : _showComingSoon),
-                    icon: _purchasePending
-                        ? SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : Icon(
-                            canPurchase
-                                ? Icons.shopping_cart_checkout_rounded
-                                : Icons.lock_clock_rounded,
-                          ),
-                    label: Text(
-                      _purchasePending
-                          ? 'جاري معالجة الدفع...'
-                          : canPurchase
-                              ? 'اشترك بـ Gideon Pro'
-                              : 'الترقية إلى Pro قريبًا',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF5FE7FF),
-                      foregroundColor: const Color(0xFF06131D),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(17),
-                      ),
-                    ),
-                  ),
-                ),
-                _buildGooglePlayStatus(),
-                SizedBox(height: 24),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    'طرق الدفع',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
                 
-     
+                
 _buildPaymentChannel(
   icon: Icons.account_balance_wallet_outlined,
   title: 'Whish Pay',

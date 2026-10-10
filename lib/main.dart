@@ -2621,8 +2621,7 @@ final message = switch (status) {
 
   @override
   Widget build(BuildContext context) {
-    final price = _storeProduct?.price ??
-        '\$${_product.price.toStringAsFixed(2)}';
+   const price = '\$4.99';
 
     final canPurchase = !_storeLoading &&
         _storeAvailable &&

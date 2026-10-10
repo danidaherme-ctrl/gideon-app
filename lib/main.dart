@@ -2863,10 +2863,9 @@ final message = switch (status) {
                   title: 'أولوية للميزات الجديدة',
                   subtitle:
                       'الوصول إلى الميزات الجديدة حسب توفرها.',
-                ),
-                
-                
+                )
 
+                
                 _buildPaymentChannel(
                   icon: Icons.account_balance_wallet_outlined,
                   title: 'Whish Pay',

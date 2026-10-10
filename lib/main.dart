@@ -2864,7 +2864,6 @@ final message = switch (status) {
                   subtitle:
                       'الوصول إلى الميزات الجديدة حسب توفرها.',
                 )
-
                 
                 _buildPaymentChannel(
                   icon: Icons.account_balance_wallet_outlined,

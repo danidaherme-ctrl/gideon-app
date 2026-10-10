@@ -2859,21 +2859,20 @@ final message = switch (status) {
                       'ميزات وقدرات جديدة عند إطلاقها رسميًا.',
                 ),
                 _buildFeature(
-                  icon: Icons.rocket_launch_rounded,
-                  title: 'أولوية للميزات الجديدة',
-                  subtitle:
-                      'الوصول إلى الميزات الجديدة حسب توفرها.',
-                )
-                
-                _buildPaymentChannel(
-                  icon: Icons.account_balance_wallet_outlined,
-                  title: 'Whish Pay',
-                  status: _channelStatus(
-                    'whish_pay',
-                    'متاح',
-                  ),
-                ),
+  icon: Icons.rocket_launch_rounded,
+  title: 'أولوية للميزات الجديدة',
+  subtitle:
+      'الوصول إلى الميزات الجديدة حسب توفرها.',
+),
 
+_buildPaymentChannel(
+  icon: Icons.account_balance_wallet_outlined,
+  title: 'Whish Pay',
+  status: _channelStatus(
+    'whish_pay',
+    'متاح',
+  ),
+),
                 if (!_accountPlanLoading &&
                     _accountPlan == 'FREE') ...[
                   const SizedBox(height: 12),

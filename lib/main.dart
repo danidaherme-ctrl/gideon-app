@@ -2916,8 +2916,55 @@ final message = switch (status) {
                         ),
                       ),
                     ),
+                  
                   ],
                 ],
+
+                const SizedBox(height: 20),
+
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.035),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.06),
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.shield_outlined,
+                        color: Color(0xFF5FE7FF),
+                        size: 22,
+                      ),
+                      const SizedBox(width: 11),
+                      Expanded(
+                        child: Text(
+                          'Gideon متاح عبر الموقع الإلكتروني فقط. '
+                          'وسيلة الدفع المعتمدة هي Whish Pay، '
+                          'وتُحدَّد صلاحية الاشتراك من الخادم '
+                          'بعد التحقق من الدفع.',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.56),
+                            fontSize: 12,
+                            height: 1.45,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 // ============================================================
 // CHAT SCREEN

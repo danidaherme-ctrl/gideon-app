@@ -2920,25 +2920,7 @@ final message = switch (status) {
                     ),
                   ),
                 ),
-                SizedBox(height: 12),
-                _buildPaymentChannel(
-                  icon: Icons.android_rounded,
-                  title: 'Google Play',
-                  status: _channelStatus(
-                    'google_play',
-                    'قريبًا',
-                  ),
-                ),
-                SizedBox(height: 9),
-                _buildPaymentChannel(
-                  icon: Icons.apple_rounded,
-                  title: 'Apple App Store',
-                  status: _channelStatus(
-                    'apple_app_store',
-                    'قريبًا',
-                  ),
-                ),
-                SizedBox(height: 9),
+                
      
 _buildPaymentChannel(
   icon: Icons.account_balance_wallet_outlined,

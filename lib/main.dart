@@ -2053,6 +2053,9 @@ class _ProScreenState extends State<ProScreen> {
   bool _storeLoading = true;
   bool _purchasePending = false;
   bool _storeAvailable = false;
+  bool _accountPlanLoading = true;
+  String _accountPlan = 'UNKNOWN';
+  String? _accountPlanExpiresAt;
    bool _whishLoading = false;
    String? _whishExternalId;
   @override
@@ -2075,6 +2078,39 @@ class _ProScreenState extends State<ProScreen> {
 
     _loadProduct();
     _loadStoreProduct();
+    _loadAccountPlan();
+  }
+
+  Future<void> _loadAccountPlan() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/account/plan'),
+        headers: {
+          'Authorization': 'Bearer ${widget.token}',
+        },
+      ).timeout(const Duration(seconds: 20));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(utf8.decode(response.bodyBytes));
+        if (data is Map<String, dynamic> && mounted) {
+          final subscription = data['subscription'];
+          setState(() {
+            _accountPlan = (data['plan']?.toString() ?? 'FREE').toUpperCase();
+            _accountPlanExpiresAt = subscription is Map
+                ? subscription['expires_at']?.toString()
+                : null;
+            _accountPlanLoading = false;
+          });
+          return;
+        }
+      }
+    } catch (_) {}
+
+    if (mounted) {
+      setState(() {
+        _accountPlanLoading = false;
+      });
+    }
   }
 
 Future<void> _payWithWhish() async {
@@ -2621,6 +2657,73 @@ final message = switch (status) {
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 30),
             child: Column(
               children: [
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: _accountPlan == 'PRO'
+                        ? const Color(0xFF123A32)
+                        : Colors.white.withValues(alpha: 0.04),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: _accountPlan == 'PRO'
+                          ? const Color(0xFF2DBE91)
+                          : Colors.white.withValues(alpha: 0.10),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _accountPlan == 'PRO'
+                            ? Icons.verified_rounded
+                            : Icons.info_outline_rounded,
+                        color: _accountPlan == 'PRO'
+                            ? const Color(0xFF2DBE91)
+                            : Colors.white70,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _accountPlanLoading
+                                  ? 'جارٍ التحقق من اشتراكك...'
+                                  : _accountPlan == 'PRO'
+                                      ? 'اشتراك Gideon Pro نشط'
+                                      : _accountPlan == 'FREE'
+                                          ? 'الخطة الحالية: Free'
+                                          : 'تعذّر التحقق من الخطة',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            if (_accountPlan == 'PRO' && _accountPlanExpiresAt != null)
+                              Text(
+                                'ينتهي الاشتراك: ${_accountPlanExpiresAt!.split('T').first}',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.65),
+                                  fontSize: 12,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'تحديث حالة الاشتراك',
+                        onPressed: _accountPlanLoading
+                            ? null
+                            : () {
+                                setState(() => _accountPlanLoading = true);
+                                _loadAccountPlan();
+                              },
+                        icon: const Icon(Icons.refresh_rounded, color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                ),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),

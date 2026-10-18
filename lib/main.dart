@@ -4452,7 +4452,7 @@ Widget _buildEmptyChat() {
                   style: TextStyle(fontWeight: FontWeight.w800),
                 ),
                 subtitle: Text(
-                  tr('\$4.99 / month • قريبًا', '\$4.99 / month • Coming soon'),
+                  tr(tr('\$4.99 / month • قريبًا', '\$4.99 / month • Coming soon'), '\$4.99 / month • Coming soon'),
                   style: TextStyle(fontSize: 11),
                 ),
                 trailing: Icon(
@@ -4773,7 +4773,9 @@ Widget _buildEmptyChat() {
           SizedBox(height: 22),
 
           Directionality(
-            textDirection: TextDirection.ltr,
+            textDirection: GideonSettings.instance.language == 'English'
+                ? TextDirection.ltr
+                : TextDirection.rtl,
             child: Wrap(
               spacing: 10,
               runSpacing: 10,

@@ -4,14 +4,20 @@ class HomeDashboard extends StatefulWidget {
   final String token;
   final String email;
   final VoidCallback onLogout;
+  final VoidCallback onOpenAccount;
   final void Function([String? mode]) onOpenChat;
+  final bool isArabic;
+  final Widget? brandMark;
 
   const HomeDashboard({
     super.key,
     required this.token,
     required this.email,
     required this.onLogout,
+    required this.onOpenAccount,
     required this.onOpenChat,
+    this.isArabic = false,
+    this.brandMark,
   });
 
   @override
@@ -21,10 +27,20 @@ class HomeDashboard extends StatefulWidget {
 class _HomeDashboardState extends State<HomeDashboard> {
   int _selectedIndex = 0;
 
+  String _tr(String arabic, String english) =>
+      widget.isArabic ? arabic : english;
+
   String get _displayName {
-    final name = widget.email.split('@').first.trim();
-    if (name.isEmpty) return 'there';
-    return name[0].toUpperCase() + name.substring(1);
+    final raw = widget.email.split('@').first.trim();
+    if (raw.isEmpty) return _tr('بك', 'there');
+    final cleaned = raw.replaceAll(RegExp(r'[._-]+'), ' ').trim();
+    if (cleaned.isEmpty) return _tr('بك', 'there');
+    return cleaned
+        .split(RegExp(r'\s+'))
+        .map((part) => part.isEmpty
+            ? part
+            : '${part[0].toUpperCase()}${part.substring(1)}')
+        .join(' ');
   }
 
   void _openChat() => widget.onOpenChat();
@@ -35,10 +51,12 @@ void _openMode(String mode) {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF070A10),
-      body: SafeArea(
-        child: Column(
+    return Directionality(
+      textDirection: widget.isArabic ? TextDirection.rtl : TextDirection.ltr,
+      child: Scaffold(
+        backgroundColor: const Color(0xFF07111F),
+        body: SafeArea(
+          child: Column(
           children: [
             _buildTopBar(),
             Expanded(
@@ -59,13 +77,10 @@ void _openMode(String mode) {
                           const SizedBox(height: 28),
                           _buildSearchCard(),
                           const SizedBox(height: 34),
-                          const Text(
-                            'Explore with Gideon',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                            ),
+                          Text(
+                            _tr('استكشف مع Gideon', 'Explore with Gideon'),
+                            style: const TextStyle(color: Colors.white,
+                                fontSize: 18, fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 14),
                           _buildModes(wide),
@@ -82,6 +97,8 @@ void _openMode(String mode) {
           ],
         ),
       ),
+        ),
+      ),
     );
   }
 
@@ -93,39 +110,34 @@ void _openMode(String mode) {
       ),
       child: Row(
         children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(11),
-              gradient: const LinearGradient(
-                colors: [Color(0xFF5B7CFF), Color(0xFF8B5CF6)],
+          widget.brandMark ??
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(11),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF5FE7FF), Color(0xFF5B7CFF)],
+                  ),
+                ),
+                child: const Icon(Icons.auto_awesome_rounded,
+                    color: Color(0xFF07111F), size: 20),
               ),
-            ),
-            child: const Icon(
-              Icons.auto_awesome_rounded,
-              color: Colors.white,
-              size: 20,
-            ),
-          ),
           const SizedBox(width: 11),
           const Text(
-            'GIDEON',
+            'GIDEON AI',
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.w800,
-              letterSpacing: 2,
+              letterSpacing: 1.6,
             ),
           ),
           const Spacer(),
           IconButton(
-            tooltip: 'Account',
-            onPressed: widget.onLogout,
-            icon: const Icon(
-              Icons.person_outline_rounded,
-              color: Colors.white70,
-            ),
+            tooltip: _tr('الحساب', 'Account'),
+            onPressed: widget.onOpenAccount,
+            icon: const Icon(Icons.person_outline_rounded, color: Colors.white70),
           ),
         ],
       ),
@@ -137,18 +149,17 @@ void _openMode(String mode) {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Good to see you, $_displayName.',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 30,
-            fontWeight: FontWeight.w700,
-            height: 1.15,
-          ),
+          _tr('أهلًا بعودتك، $_displayName', 'Good to see you, $_displayName'),
+          textAlign: widget.isArabic ? TextAlign.right : TextAlign.left,
+          style: const TextStyle(color: Colors.white, fontSize: 30,
+              fontWeight: FontWeight.w700, height: 1.15),
         ),
         const SizedBox(height: 9),
-        const Text(
-          'Ask anything. Research deeply. Get things done.',
-          style: TextStyle(color: Colors.white54, fontSize: 16),
+        Text(
+          _tr('اسأل، ابحث بعمق، وأنجز المزيد.',
+              'Ask anything. Research deeply. Get things done.'),
+          textAlign: widget.isArabic ? TextAlign.right : TextAlign.left,
+          style: const TextStyle(color: Colors.white54, fontSize: 16, height: 1.5),
         ),
       ],
     );
@@ -162,54 +173,37 @@ void _openMode(String mode) {
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(20, 19, 14, 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF10151F),
+          color: const Color(0xFF101E30),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: const Color(0xFF293346)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.search_rounded, color: Colors.white38, size: 21),
-                SizedBox(width: 10),
+                const Icon(Icons.search_rounded, color: Colors.white38, size: 21),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Ask Gideon anything...',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    _tr('اسأل Gideon عن أي شيء...', 'Ask Gideon anything...'),
+                    style: const TextStyle(color: Colors.white70, fontSize: 16,
+                        fontWeight: FontWeight.w500),
                   ),
                 ),
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  color: Colors.white38,
-                  size: 20,
-                ),
+                const Icon(Icons.arrow_forward_rounded, color: Colors.white38, size: 20),
               ],
             ),
             const SizedBox(height: 20),
             Row(
               children: [
-                _miniAction(
-                  Icons.public_rounded,
-                  'Research',
-                  () => _openMode('Research'),
-                ),
+                _miniAction(Icons.public_rounded, _tr('بحث', 'Research'),
+                    () => _openMode('Research')),
                 const SizedBox(width: 8),
-                _miniAction(
-                  Icons.auto_awesome_rounded,
-                  'Deep Think',
-                  () => _openMode('Deep Think'),
-                ),
+                _miniAction(Icons.auto_awesome_rounded, _tr('تفكير عميق', 'Deep Think'),
+                    () => _openMode('Deep Think')),
                 const SizedBox(width: 8),
-                _miniAction(
-                  Icons.attach_file_rounded,
-                  'Attach',
-                  _openChat,
-                ),
+                _miniAction(Icons.attach_file_rounded, _tr('إرفاق', 'Attach'), _openChat),
               ],
             ),
           ],
@@ -250,30 +244,18 @@ void _openMode(String mode) {
 
   Widget _buildModes(bool wide) {
     final cards = [
-      _modeCard(
-        Icons.public_rounded,
-        'Research',
-        'Search, analyze and synthesize information.',
-        () => _openMode('Research'),
-      ),
-      _modeCard(
-        Icons.edit_outlined,
-        'Write',
-        'Draft, rewrite and improve your content.',
-        () => _openMode('Write'),
-      ),
-      _modeCard(
-        Icons.code_rounded,
-        'Code',
-        'Build, explain and debug code with Gideon.',
-        () => _openMode('Code'),
-      ),
-      _modeCard(
-        Icons.lightbulb_outline_rounded,
-        'Ideas',
-        'Brainstorm concepts and explore possibilities.',
-        () => _openMode('Ideas'),
-      ),
+      _modeCard(Icons.public_rounded, _tr('البحث', 'Research'),
+          _tr('ابحث عن المعلومات وحلّلها واختصرها.', 'Search, analyze and synthesize information.'),
+          () => _openMode('Research')),
+      _modeCard(Icons.edit_outlined, _tr('الكتابة', 'Write'),
+          _tr('اكتب المحتوى وأعد صياغته وحسّنه.', 'Draft, rewrite and improve your content.'),
+          () => _openMode('Write')),
+      _modeCard(Icons.code_rounded, _tr('البرمجة', 'Code'),
+          _tr('أنشئ الكود واشرحه واكتشف أخطاءه.', 'Build, explain and debug code with Gideon.'),
+          () => _openMode('Code')),
+      _modeCard(Icons.lightbulb_outline_rounded, _tr('الأفكار', 'Ideas'),
+          _tr('ابتكر أفكارًا واستكشف احتمالات جديدة.', 'Brainstorm concepts and explore possibilities.'),
+          () => _openMode('Ideas')),
     ];
 
     if (wide) {
@@ -318,10 +300,10 @@ void _openMode(String mode) {
       height: 145,
       padding: const EdgeInsets.all(17),
       decoration: BoxDecoration(
-        color: const Color(0xFF0E131C),
+        color: const Color(0xFF0B1830),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFF202938),
+          color: const Color(0xFF26364A),
         ),
       ),
       child: Column(
@@ -329,7 +311,7 @@ void _openMode(String mode) {
         children: [
           Icon(
             icon,
-            color: const Color(0xFF91A8FF),
+            color: const Color(0xFF5FE7FF),
             size: 23,
           ),
 
@@ -366,40 +348,31 @@ void _openMode(String mode) {
       width: double.infinity,
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: const Color(0xFF0B1018),
+        color: const Color(0xFF0A1526),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF1B2432)),
+        border: Border.all(color: const Color(0xFF1B2A3D)),
       ),
       child: Row(
         children: [
           const Icon(Icons.history_rounded, color: Colors.white30, size: 24),
           const SizedBox(width: 14),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Recent conversations',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Your conversations will appear here.',
-                  style: TextStyle(color: Colors.white30, fontSize: 12),
-                ),
+                Text(_tr('المحادثات الأخيرة', 'Recent conversations'),
+                    style: const TextStyle(color: Colors.white70, fontSize: 14,
+                        fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                Text(_tr('ستظهر محادثاتك هنا.', 'Your conversations will appear here.'),
+                    style: const TextStyle(color: Colors.white30, fontSize: 12)),
               ],
             ),
           ),
           TextButton(
             onPressed: _openChat,
-            child: const Text(
-              'Open Chat',
-              style: TextStyle(color: Color(0xFF91A8FF)),
-            ),
+            child: Text(_tr('افتح المحادثة', 'Open Chat'),
+                style: const TextStyle(color: Color(0xFF5FE7FF))),
           ),
         ],
       ),
@@ -410,31 +383,19 @@ void _openMode(String mode) {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 9, 12, 11),
       decoration: const BoxDecoration(
-        color: Color(0xFF080C13),
+        color: Color(0xFF07111F),
         border: Border(top: BorderSide(color: Color(0xFF171D28))),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _navItem(Icons.home_rounded, 'Home', 0, () {}),
-          _navItem(
-            Icons.public_rounded,
-            'Research',
-            1,
-            () => _openMode('Research'),
-          ),
-          _navItem(
-            Icons.chat_bubble_outline_rounded,
-            'Chat',
-            2,
-            _openChat,
-          ),
-          _navItem(
-            Icons.person_outline_rounded,
-            'Account',
-            3,
-            widget.onLogout,
-          ),
+          _navItem(Icons.home_rounded, _tr('الرئيسية', 'Home'), 0, () {}),
+          _navItem(Icons.public_rounded, _tr('البحث', 'Research'), 1,
+              () => _openMode('Research')),
+          _navItem(Icons.chat_bubble_outline_rounded, _tr('المحادثة', 'Chat'), 2,
+              _openChat),
+          _navItem(Icons.person_outline_rounded, _tr('الحساب', 'Account'), 3,
+              widget.onOpenAccount),
         ],
       ),
     );
@@ -461,7 +422,7 @@ void _openMode(String mode) {
             Icon(
               icon,
               size: 20,
-              color: selected ? const Color(0xFF91A8FF) : Colors.white38,
+              color: selected ? const Color(0xFF5FE7FF) : Colors.white38,
             ),
             const SizedBox(height: 4),
             Text(

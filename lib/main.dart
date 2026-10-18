@@ -573,6 +573,16 @@ class _AppGateState extends State<AppGate> {
       token: _token!,
       email: _email ?? '',
       onLogout: _logout,
+      onOpenAccount: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => AccountScreen(
+              token: _token!,
+              email: _email ?? '',
+            ),
+          ),
+        );
+      },
       onOpenChat: ([String? mode]) {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -585,6 +595,8 @@ class _AppGateState extends State<AppGate> {
           ),
         );
       },
+      isArabic: GideonSettings.instance.language != 'English',
+      brandMark: GideonLogo(size: 38, radius: 11),
     );
   }
 }
@@ -1678,7 +1690,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ListTile(
                   leading: Icon(Icons.auto_awesome_rounded),
                   title: Text('Gideon Pro'),
-                  subtitle: Text('\$4.99 / month • قريبًا'),
+                  subtitle: Text(tr('٤٫٩٩ دولار شهريًا • قريبًا', '\$4.99 / month • Coming soon')),
                   trailing: Icon(Icons.chevron_left_rounded),
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
@@ -1689,7 +1701,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Divider(height: 1),
                 ListTile(
                   leading: Icon(Icons.language_outlined),
-                  title: Text('موقع Gideon'),
+                  title: Text(tr('موقع Gideon', 'Gideon website')), 
                   subtitle: Text('gideonassistant.uk'),
                   trailing: Icon(Icons.open_in_new_rounded, size: 19),
                   onTap: () => launchUrl(
@@ -1700,7 +1712,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Divider(height: 1),
                 ListTile(
                   leading: Icon(Icons.info_outline_rounded),
-                  title: Text('حول Gideon'),
+                  title: Text(tr('حول Gideon', 'About Gideon')), 
                   trailing: Icon(Icons.chevron_left_rounded),
                   onTap: () => showAboutDialog(
                     context: context,
@@ -4134,7 +4146,7 @@ Widget _buildEmptyChat() {
               onPressed: () {
                 Navigator.pop(dialogContext, true);
               },
-              child: Text('حذف'),
+              child: Text(tr('حذف', 'Delete')), 
             ),
           ],
         );
@@ -4242,7 +4254,7 @@ Widget _buildEmptyChat() {
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF0E1A2A),
-          title: Text('تسجيل الخروج'),
+          title: Text(tr('تسجيل الخروج', 'Log out')), 
           content: Text(
             'هل تريد تسجيل الخروج من حسابك؟',
           ),
@@ -4355,7 +4367,7 @@ Widget _buildEmptyChat() {
           itemBuilder: (context) => const [
             PopupMenuItem(
               value: 'rename',
-              child: Text('إعادة التسمية'),
+              child: Text(tr('إعادة التسمية', 'Rename')), 
             ),
             PopupMenuItem(
               value: 'delete',
@@ -4369,7 +4381,12 @@ Widget _buildEmptyChat() {
   }
 
   Widget _buildDrawer() {
+    final drawerWidth = math.min(
+      MediaQuery.of(context).size.width * 0.82,
+      320.0,
+    );
     return Drawer(
+      width: drawerWidth,
       backgroundColor: const Color(0xFF091524),
       child: SafeArea(
         child: Column(
@@ -4409,7 +4426,7 @@ Widget _buildEmptyChat() {
                   icon: Icon(
                     Icons.add_comment_outlined,
                   ),
-                  label: Text('محادثة جديدة'),
+                  label: Text(tr('محادثة جديدة', 'New chat')),
                   style: FilledButton.styleFrom(
                     backgroundColor:
                         const Color(0xFF5FE7FF),
@@ -4470,7 +4487,7 @@ Widget _buildEmptyChat() {
                   ),
                   SizedBox(width: 8),
                   Text(
-                    'المحادثات السابقة',
+                    tr('المحادثات السابقة', 'Recent conversations'),
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: Colors.white.withValues(
@@ -4491,7 +4508,7 @@ Widget _buildEmptyChat() {
                           child: Padding(
                             padding: const EdgeInsets.all(28),
                             child: Text(
-                              'لا توجد محادثات سابقة بعد.',
+                              tr('لا توجد محادثات سابقة بعد.', 'No conversations yet.'),
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.white.withValues(
@@ -4522,7 +4539,7 @@ Widget _buildEmptyChat() {
               leading: Icon(
                 Icons.account_circle_outlined,
               ),
-              title: Text('الحساب'),
+              title: Text(tr('الحساب', 'Account')), 
               subtitle: Text(
                 widget.email,
                 overflow: TextOverflow.ellipsis,
@@ -4543,8 +4560,8 @@ Widget _buildEmptyChat() {
               leading: Icon(
                 Icons.settings_outlined,
               ),
-              title: Text('الإعدادات'),
-              subtitle: Text('الحساب والتخصيص والخصوصية'),
+              title: Text(tr('الإعدادات', 'Settings')), 
+              subtitle: Text(tr('الحساب والتخصيص والخصوصية', 'Account, preferences & privacy')), 
               onTap: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).push(
@@ -4611,7 +4628,7 @@ Widget _buildEmptyChat() {
         ),
         actions: [
           IconButton(
-            tooltip: 'Gideon Pro',
+            tooltip: tr('Gideon Pro', 'Gideon Pro'),
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -4625,7 +4642,7 @@ Widget _buildEmptyChat() {
             ),
           ),
           IconButton(
-            tooltip: 'محادثة جديدة',
+            tooltip: tr('محادثة جديدة', 'New chat'),
             onPressed: _startNewChat,
             icon: Icon(
               Icons.edit_square,
@@ -4686,7 +4703,7 @@ Widget _buildEmptyChat() {
         ),
         if (_currentConversationId != null)
           Text(
-            'محادثة',
+            tr('محادثة', 'Conversation'),
             style: TextStyle(
               fontSize: 10,
               color: Colors.white.withValues(alpha: 0.42),

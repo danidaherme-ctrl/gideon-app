@@ -572,7 +572,16 @@ class _AppGateState extends State<AppGate> {
         return HomeDashboard(
       token: _token!,
       email: _email ?? '',
-      onLogout: _logout,
+      onOpenAccount: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => AccountScreen(
+              token: _token!,
+              email: _email ?? '',
+            ),
+          ),
+        );
+      },
       onOpenChat: ([String? mode]) {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -585,6 +594,8 @@ class _AppGateState extends State<AppGate> {
           ),
         );
       },
+      isArabic: GideonSettings.instance.language != 'English',
+      brandMark: GideonLogo(size: 38, radius: 11),
     );
   }
 }
@@ -1678,7 +1689,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ListTile(
                   leading: Icon(Icons.auto_awesome_rounded),
                   title: Text('Gideon Pro'),
-                  subtitle: Text('\$4.99 / month • قريبًا'),
+                  subtitle: Text(tr('٤٫٩٩ دولار شهريًا • قريبًا', '\$4.99 / month • Coming soon')),
                   trailing: Icon(Icons.chevron_left_rounded),
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
@@ -1689,7 +1700,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Divider(height: 1),
                 ListTile(
                   leading: Icon(Icons.language_outlined),
-                  title: Text('موقع Gideon'),
+                  title: Text(tr('موقع Gideon', 'Gideon website')), 
                   subtitle: Text('gideonassistant.uk'),
                   trailing: Icon(Icons.open_in_new_rounded, size: 19),
                   onTap: () => launchUrl(
@@ -1700,7 +1711,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Divider(height: 1),
                 ListTile(
                   leading: Icon(Icons.info_outline_rounded),
-                  title: Text('حول Gideon'),
+                  title: Text(tr('حول Gideon', 'About Gideon')), 
                   trailing: Icon(Icons.chevron_left_rounded),
                   onTap: () => showAboutDialog(
                     context: context,
@@ -4134,7 +4145,7 @@ Widget _buildEmptyChat() {
               onPressed: () {
                 Navigator.pop(dialogContext, true);
               },
-              child: Text('حذف'),
+              child: Text(tr('حذف', 'Delete')), 
             ),
           ],
         );
@@ -4242,7 +4253,7 @@ Widget _buildEmptyChat() {
       builder: (context) {
         return AlertDialog(
           backgroundColor: const Color(0xFF0E1A2A),
-          title: Text('تسجيل الخروج'),
+          title: Text(tr('تسجيل الخروج', 'Log out')), 
           content: Text(
             'هل تريد تسجيل الخروج من حسابك؟',
           ),
@@ -4352,14 +4363,14 @@ Widget _buildEmptyChat() {
               _deleteConversation(conversation);
             }
           },
-          itemBuilder: (context) => const [
+          itemBuilder: (context) => [
             PopupMenuItem(
               value: 'rename',
-              child: Text('إعادة التسمية'),
+              child: Text(tr('إعادة التسمية', 'Rename')),
             ),
             PopupMenuItem(
               value: 'delete',
-              child: Text('حذف'),
+              child: Text(tr('حذف', 'Delete')),
             ),
           ],
         ),
@@ -4369,7 +4380,12 @@ Widget _buildEmptyChat() {
   }
 
   Widget _buildDrawer() {
+    final drawerWidth = math.min(
+      MediaQuery.of(context).size.width * 0.82,
+      320.0,
+    ).toDouble();
     return Drawer(
+      width: drawerWidth,
       backgroundColor: const Color(0xFF091524),
       child: SafeArea(
         child: Column(
@@ -4387,7 +4403,7 @@ Widget _buildEmptyChat() {
                   SizedBox(width: 14),
                   Expanded(
                     child: Text(
-                      'Gideon',
+                      'Gideon AI',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
@@ -4409,7 +4425,7 @@ Widget _buildEmptyChat() {
                   icon: Icon(
                     Icons.add_comment_outlined,
                   ),
-                  label: Text('محادثة جديدة'),
+                  label: Text(tr('محادثة جديدة', 'New chat')),
                   style: FilledButton.styleFrom(
                     backgroundColor:
                         const Color(0xFF5FE7FF),
@@ -4436,7 +4452,7 @@ Widget _buildEmptyChat() {
                   style: TextStyle(fontWeight: FontWeight.w800),
                 ),
                 subtitle: Text(
-                  '\$4.99 / month • قريبًا',
+                  tr('\$4.99 / month • قريبًا', '\$4.99 / month • Coming soon'),
                   style: TextStyle(fontSize: 11),
                 ),
                 trailing: Icon(
@@ -4470,7 +4486,7 @@ Widget _buildEmptyChat() {
                   ),
                   SizedBox(width: 8),
                   Text(
-                    'المحادثات السابقة',
+                    tr('المحادثات السابقة', 'Recent conversations'),
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: Colors.white.withValues(
@@ -4491,7 +4507,7 @@ Widget _buildEmptyChat() {
                           child: Padding(
                             padding: const EdgeInsets.all(28),
                             child: Text(
-                              'لا توجد محادثات سابقة بعد.',
+                              tr('لا توجد محادثات سابقة بعد.', 'No conversations yet.'),
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.white.withValues(
@@ -4522,7 +4538,7 @@ Widget _buildEmptyChat() {
               leading: Icon(
                 Icons.account_circle_outlined,
               ),
-              title: Text('الحساب'),
+              title: Text(tr('الحساب', 'Account')), 
               subtitle: Text(
                 widget.email,
                 overflow: TextOverflow.ellipsis,
@@ -4543,8 +4559,8 @@ Widget _buildEmptyChat() {
               leading: Icon(
                 Icons.settings_outlined,
               ),
-              title: Text('الإعدادات'),
-              subtitle: Text('الحساب والتخصيص والخصوصية'),
+              title: Text(tr('الإعدادات', 'Settings')), 
+              subtitle: Text(tr('الحساب والتخصيص والخصوصية', 'Account, preferences & privacy')), 
               onTap: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).push(
@@ -4561,14 +4577,14 @@ Widget _buildEmptyChat() {
               leading: Icon(
                 Icons.info_outline,
               ),
-              title: Text('حول Gideon'),
+              title: Text(tr('حول Gideon', 'About Gideon')),
               onTap: _showAbout,
             ),
             ListTile(
               leading: Icon(
                 Icons.language_rounded,
               ),
-              title: Text('موقع Gideon'),
+              title: Text(tr('موقع Gideon', 'Gideon website')),
               subtitle: Text(
                 'gideonassistant.uk',
                 style: TextStyle(fontSize: 11),
@@ -4582,7 +4598,7 @@ Widget _buildEmptyChat() {
               leading: Icon(
                 Icons.logout,
               ),
-              title: Text('تسجيل الخروج'),
+              title: Text(tr('تسجيل الخروج', 'Sign out')),
               onTap: _confirmLogout,
             ),
             SizedBox(height: 8),
@@ -4594,7 +4610,11 @@ Widget _buildEmptyChat() {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Directionality(
+      textDirection: GideonSettings.instance.language == 'English'
+          ? TextDirection.ltr
+          : TextDirection.rtl,
+      child: Scaffold(
       drawer: _buildDrawer(),
       appBar: AppBar(
         backgroundColor: const Color(0xFF07111F),
@@ -4611,7 +4631,7 @@ Widget _buildEmptyChat() {
         ),
         actions: [
           IconButton(
-            tooltip: 'Gideon Pro',
+            tooltip: tr('Gideon Pro', 'Gideon Pro'),
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -4625,7 +4645,7 @@ Widget _buildEmptyChat() {
             ),
           ),
           IconButton(
-            tooltip: 'محادثة جديدة',
+            tooltip: tr('محادثة جديدة', 'New chat'),
             onPressed: _startNewChat,
             icon: Icon(
               Icons.edit_square,
@@ -4656,11 +4676,12 @@ Widget _buildEmptyChat() {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildAppBarTitle() {
-    String title = 'Gideon';
+    String title = 'Gideon AI';
 
     if (_currentConversationId != null) {
       for (final conversation in _conversations) {
@@ -4686,7 +4707,7 @@ Widget _buildEmptyChat() {
         ),
         if (_currentConversationId != null)
           Text(
-            'محادثة',
+            tr('محادثة', 'Conversation'),
             style: TextStyle(
               fontSize: 10,
               color: Colors.white.withValues(alpha: 0.42),
@@ -4698,6 +4719,10 @@ Widget _buildEmptyChat() {
   }
 
   Widget _buildWelcome() {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final columns = screenWidth >= 700 ? 4 : 2;
+    final modeCardWidth =
+        (screenWidth - (columns == 4 ? 70 : 54)) / columns;
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 28, 20, 30),
       child: Column(
@@ -4710,12 +4735,12 @@ Widget _buildEmptyChat() {
           SizedBox(height: 28),
 
           Align(
-            alignment: Alignment.centerRight,
+            alignment: AlignmentDirectional.centerStart,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'GIDEON CORE ONLINE',
+                  tr('GIDEON جاهز لمساعدتك', 'GIDEON CORE ONLINE'),
                   style: TextStyle(
                     fontSize: 11,
                     letterSpacing: 2.2,
@@ -4725,7 +4750,7 @@ Widget _buildEmptyChat() {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'مرحبًا، أنا Gideon. شو بدنا نعمل اليوم؟',
+                  tr('مرحبًا، أنا Gideon. شو بدنا نعمل اليوم؟', 'Hi, I’m Gideon. What shall we do today?'),
                   style: TextStyle(
                     fontSize: 23,
                     height: 1.22,
@@ -4734,7 +4759,7 @@ Widget _buildEmptyChat() {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'فكّر، اصنع، واستكشف مع Gideon',
+                  tr('فكّر، أنشئ، واستكشف مع Gideon', 'Think, create, and explore with Gideon'),
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.white.withValues(alpha: 0.55),
@@ -4749,50 +4774,52 @@ Widget _buildEmptyChat() {
           SizedBox(height: 22),
 
           Directionality(
-            textDirection: TextDirection.ltr,
+            textDirection: GideonSettings.instance.language == 'English'
+                ? TextDirection.ltr
+                : TextDirection.rtl,
             child: Wrap(
               spacing: 10,
               runSpacing: 10,
               children: [
                 SizedBox(
-                  width: (MediaQuery.of(context).size.width - 50) / 4,
+                  width: modeCardWidth,
                   child: _buildModeCard(
                     icon: Icons.psychology_alt_rounded,
-                    label: 'THINK',
-                    subtitle: 'حلّل وفكّر',
+                    label: tr('فكّر', 'THINK'),
+                    subtitle: tr('حلّل وفكّر', 'Think and analyze'),
                     onTap: () => _sendMessage(
-                      suggestedMessage: 'ساعدني في تحليل فكرة وأعطني أفضل الخيارات.',
+                      suggestedMessage: tr('ساعدني في تحليل فكرة وأعطني أفضل الخيارات.', 'Help me analyze an idea and compare the best options.'),
                     ),
                   ),
                 ),
                 SizedBox(
-                  width: (MediaQuery.of(context).size.width - 50) / 4,
+                  width: modeCardWidth,
                   child: _buildModeCard(
                     icon: Icons.auto_awesome_rounded,
-                    label: 'CREATE',
-                    subtitle: 'ابنِ شيئًا',
+                    label: tr('أنشئ', 'CREATE'),
+                    subtitle: tr('أنشئ شيئًا', 'Create something'),
                     onTap: () => _sendMessage(
-                      suggestedMessage: 'ساعدني في إنشاء فكرة إبداعية جديدة.',
+                      suggestedMessage: tr('ساعدني في إنشاء فكرة إبداعية جديدة.', 'Help me create a new idea.'),
                     ),
                   ),
                 ),
                 SizedBox(
-                  width: (MediaQuery.of(context).size.width - 50) / 4,
+                  width: modeCardWidth,
                   child: _buildModeCard(
                     icon: Icons.explore_rounded,
-                    label: 'EXPLORE',
-                    subtitle: 'اكتشف أكثر',
+                    label: tr('استكشف', 'EXPLORE'),
+                    subtitle: tr('اكتشف المزيد', 'Explore more'),
                     onTap: () => _sendMessage(
-                      suggestedMessage: 'أعطني موضوعًا مثيرًا أستكشفه اليوم.',
+                      suggestedMessage: tr('أعطني موضوعًا مثيرًا أستكشفه اليوم.', 'Suggest an interesting topic for me to explore today.'),
                     ),
                   ),
                 ),
                 SizedBox(
-                  width: (MediaQuery.of(context).size.width - 50) / 4,
+                  width: modeCardWidth,
                   child: _buildModeCard(
                     icon: Icons.search_rounded,
-                    label: 'RESEARCH',
-                    subtitle: 'ابحث بالمصادر',
+                    label: tr('ابحث', 'RESEARCH'),
+                    subtitle: tr('ابحث بالمصادر', 'Research with sources'),
                     onTap: _showResearchDialog,
                   ),
                 ),
@@ -4817,16 +4844,16 @@ Widget _buildEmptyChat() {
             SizedBox(height: 12),
             _buildQuickAction(
               icon: Icons.lightbulb_outline_rounded,
-              title: 'فكرة مشروع جديد',
-              subtitle: 'خلّي GIDEON يساعدك تبدأ',
-              message: 'أعطني فكرة مشروع تقني مبتكر يمكنني تنفيذها.',
+              title: tr('فكرة مشروع جديد', 'New project idea'),
+              subtitle: tr('خلّي GIDEON يساعدك تبدأ', 'Let GIDEON help you get started'),
+              message: tr('أعطني فكرة مشروع تقني مبتكر يمكنني تنفيذها.', 'Give me an innovative tech business idea I can build.'),
             ),
             SizedBox(height: 10),
             _buildQuickAction(
               icon: Icons.code_rounded,
-              title: 'مهمة برمجية',
-              subtitle: 'ابنِ وتعلّم خطوة بخطوة',
-              message: 'ساعدني في بناء مشروع برمجي خطوة بخطوة.',
+              title: tr('مهمة برمجية', 'Coding task'),
+              subtitle: tr('ابنِ وتعلّم خطوة بخطوة', 'Build and learn step by step'),
+              message: tr('ساعدني في بناء مشروع برمجي خطوة بخطوة.', 'Help me build a software project step by step.'),
             ),
           ],
         ],
@@ -5280,7 +5307,7 @@ Widget _buildEmptyChat() {
                   width: 48,
                   height: 50,
                   child: IconButton(
-                    tooltip: 'إضافة مرفق',
+                    tooltip: tr('إضافة مرفق', 'Add attachment'),
                     onPressed: _sending ? null : _showAttachmentMenu,
                     icon: Icon(
                       Icons.add_rounded,
@@ -5296,7 +5323,7 @@ Widget _buildEmptyChat() {
                     maxLines: 6,
                     textInputAction: TextInputAction.newline,
                     decoration: InputDecoration(
-                      hintText: 'اكتب رسالتك...',
+                      hintText: tr('اكتب رسالتك...', 'Type your message...'),
                       filled: true,
                       fillColor: Colors.white.withValues(alpha: 0.055),
                       contentPadding: const EdgeInsets.symmetric(

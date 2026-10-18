@@ -4452,7 +4452,7 @@ Widget _buildEmptyChat() {
                   style: TextStyle(fontWeight: FontWeight.w800),
                 ),
                 subtitle: Text(
-                  tr(tr('\$4.99 / month • قريبًا', '\$4.99 / month • Coming soon'), '\$4.99 / month • Coming soon'),
+                  tr('\$4.99 / month • قريبًا', '\$4.99 / month • Coming soon'),
                   style: TextStyle(fontSize: 11),
                 ),
                 trailing: Icon(

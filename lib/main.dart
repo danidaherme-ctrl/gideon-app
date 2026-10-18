@@ -4403,7 +4403,7 @@ Widget _buildEmptyChat() {
                   SizedBox(width: 14),
                   Expanded(
                     child: Text(
-                      'Gideon',
+                      'Gideon AI',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
@@ -4452,7 +4452,7 @@ Widget _buildEmptyChat() {
                   style: TextStyle(fontWeight: FontWeight.w800),
                 ),
                 subtitle: Text(
-                  '\$4.99 / month • قريبًا',
+                  tr('\$4.99 / month • قريبًا', '\$4.99 / month • Coming soon'),
                   style: TextStyle(fontSize: 11),
                 ),
                 trailing: Icon(
@@ -4577,14 +4577,14 @@ Widget _buildEmptyChat() {
               leading: Icon(
                 Icons.info_outline,
               ),
-              title: Text('حول Gideon'),
+              title: Text(tr('حول Gideon', 'About Gideon')),
               onTap: _showAbout,
             ),
             ListTile(
               leading: Icon(
                 Icons.language_rounded,
               ),
-              title: Text('موقع Gideon'),
+              title: Text(tr('موقع Gideon', 'Gideon website')),
               subtitle: Text(
                 'gideonassistant.uk',
                 style: TextStyle(fontSize: 11),
@@ -4598,7 +4598,7 @@ Widget _buildEmptyChat() {
               leading: Icon(
                 Icons.logout,
               ),
-              title: Text('تسجيل الخروج'),
+              title: Text(tr('تسجيل الخروج', 'Sign out')),
               onTap: _confirmLogout,
             ),
             SizedBox(height: 8),
@@ -4610,7 +4610,11 @@ Widget _buildEmptyChat() {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Directionality(
+      textDirection: GideonSettings.instance.language == 'English'
+          ? TextDirection.ltr
+          : TextDirection.rtl,
+      child: Scaffold(
       drawer: _buildDrawer(),
       appBar: AppBar(
         backgroundColor: const Color(0xFF07111F),
@@ -4672,11 +4676,11 @@ Widget _buildEmptyChat() {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
 
   Widget _buildAppBarTitle() {
-    String title = 'Gideon';
+    String title = 'Gideon AI';
 
     if (_currentConversationId != null) {
       for (final conversation in _conversations) {
@@ -4714,6 +4718,10 @@ Widget _buildEmptyChat() {
   }
 
   Widget _buildWelcome() {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final columns = screenWidth >= 700 ? 4 : 2;
+    final modeCardWidth =
+        (screenWidth - (columns == 4 ? 70 : 54)) / columns;
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 28, 20, 30),
       child: Column(
@@ -4726,12 +4734,12 @@ Widget _buildEmptyChat() {
           SizedBox(height: 28),
 
           Align(
-            alignment: Alignment.centerRight,
+            alignment: AlignmentDirectional.centerStart,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'GIDEON CORE ONLINE',
+                  tr('GIDEON جاهز لمساعدتك', 'GIDEON CORE ONLINE'),
                   style: TextStyle(
                     fontSize: 11,
                     letterSpacing: 2.2,
@@ -4741,7 +4749,7 @@ Widget _buildEmptyChat() {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'مرحبًا، أنا Gideon. شو بدنا نعمل اليوم؟',
+                  tr('مرحبًا، أنا Gideon. شو بدنا نعمل اليوم؟', 'Hi, I’m Gideon. What shall we do today?'),
                   style: TextStyle(
                     fontSize: 23,
                     height: 1.22,
@@ -4750,7 +4758,7 @@ Widget _buildEmptyChat() {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'فكّر، اصنع، واستكشف مع Gideon',
+                  tr('فكّر، أنشئ، واستكشف مع Gideon', 'Think, create, and explore with Gideon'),
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.white.withValues(alpha: 0.55),
@@ -4771,44 +4779,44 @@ Widget _buildEmptyChat() {
               runSpacing: 10,
               children: [
                 SizedBox(
-                  width: (MediaQuery.of(context).size.width - 50) / 4,
+                  width: modeCardWidth,
                   child: _buildModeCard(
                     icon: Icons.psychology_alt_rounded,
-                    label: 'THINK',
-                    subtitle: 'حلّل وفكّر',
+                    label: tr('فكّر', 'THINK'),
+                    subtitle: tr('حلّل وفكّر', 'Think and analyze'),
                     onTap: () => _sendMessage(
-                      suggestedMessage: 'ساعدني في تحليل فكرة وأعطني أفضل الخيارات.',
+                      suggestedMessage: tr('ساعدني في تحليل فكرة وأعطني أفضل الخيارات.', 'Help me analyze an idea and compare the best options.'),
                     ),
                   ),
                 ),
                 SizedBox(
-                  width: (MediaQuery.of(context).size.width - 50) / 4,
+                  width: modeCardWidth,
                   child: _buildModeCard(
                     icon: Icons.auto_awesome_rounded,
-                    label: 'CREATE',
-                    subtitle: 'ابنِ شيئًا',
+                    label: tr('أنشئ', 'CREATE'),
+                    subtitle: tr('أنشئ شيئًا', 'Create something'),
                     onTap: () => _sendMessage(
-                      suggestedMessage: 'ساعدني في إنشاء فكرة إبداعية جديدة.',
+                      suggestedMessage: tr('ساعدني في إنشاء فكرة إبداعية جديدة.', 'Help me create a new idea.'),
                     ),
                   ),
                 ),
                 SizedBox(
-                  width: (MediaQuery.of(context).size.width - 50) / 4,
+                  width: modeCardWidth,
                   child: _buildModeCard(
                     icon: Icons.explore_rounded,
-                    label: 'EXPLORE',
-                    subtitle: 'اكتشف أكثر',
+                    label: tr('استكشف', 'EXPLORE'),
+                    subtitle: tr('اكتشف المزيد', 'Explore more'),
                     onTap: () => _sendMessage(
-                      suggestedMessage: 'أعطني موضوعًا مثيرًا أستكشفه اليوم.',
+                      suggestedMessage: tr('أعطني موضوعًا مثيرًا أستكشفه اليوم.', 'Suggest an interesting topic for me to explore today.'),
                     ),
                   ),
                 ),
                 SizedBox(
-                  width: (MediaQuery.of(context).size.width - 50) / 4,
+                  width: modeCardWidth,
                   child: _buildModeCard(
                     icon: Icons.search_rounded,
-                    label: 'RESEARCH',
-                    subtitle: 'ابحث بالمصادر',
+                    label: tr('ابحث', 'RESEARCH'),
+                    subtitle: tr('ابحث بالمصادر', 'Research with sources'),
                     onTap: _showResearchDialog,
                   ),
                 ),
@@ -4833,16 +4841,16 @@ Widget _buildEmptyChat() {
             SizedBox(height: 12),
             _buildQuickAction(
               icon: Icons.lightbulb_outline_rounded,
-              title: 'فكرة مشروع جديد',
-              subtitle: 'خلّي GIDEON يساعدك تبدأ',
-              message: 'أعطني فكرة مشروع تقني مبتكر يمكنني تنفيذها.',
+              title: tr('فكرة مشروع جديد', 'New project idea'),
+              subtitle: tr('خلّي GIDEON يساعدك تبدأ', 'Let GIDEON help you get started'),
+              message: tr('أعطني فكرة مشروع تقني مبتكر يمكنني تنفيذها.', 'Give me an innovative tech business idea I can build.'),
             ),
             SizedBox(height: 10),
             _buildQuickAction(
               icon: Icons.code_rounded,
-              title: 'مهمة برمجية',
-              subtitle: 'ابنِ وتعلّم خطوة بخطوة',
-              message: 'ساعدني في بناء مشروع برمجي خطوة بخطوة.',
+              title: tr('مهمة برمجية', 'Coding task'),
+              subtitle: tr('ابنِ وتعلّم خطوة بخطوة', 'Build and learn step by step'),
+              message: tr('ساعدني في بناء مشروع برمجي خطوة بخطوة.', 'Help me build a software project step by step.'),
             ),
           ],
         ],

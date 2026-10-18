@@ -407,7 +407,9 @@ void _openMode(String mode) {
     final selected = _selectedIndex == index;
     return InkWell(
       onTap: () {
-        setState(() => _selectedIndex = index);
+        if (index == 0) {
+          setState(() => _selectedIndex = 0);
+        }
         onTap();
       },
       borderRadius: BorderRadius.circular(14),

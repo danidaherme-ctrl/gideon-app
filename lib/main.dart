@@ -572,7 +572,6 @@ class _AppGateState extends State<AppGate> {
         return HomeDashboard(
       token: _token!,
       email: _email ?? '',
-      onLogout: _logout,
       onOpenAccount: () {
         Navigator.of(context).push(
           MaterialPageRoute(

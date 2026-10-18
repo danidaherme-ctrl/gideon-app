@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 class HomeDashboard extends StatefulWidget {
   final String token;
   final String email;
-  final VoidCallback onLogout;
   final VoidCallback onOpenAccount;
   final void Function([String? mode]) onOpenChat;
   final bool isArabic;
@@ -13,7 +12,6 @@ class HomeDashboard extends StatefulWidget {
     super.key,
     required this.token,
     required this.email,
-    required this.onLogout,
     required this.onOpenAccount,
     required this.onOpenChat,
     this.isArabic = false,
@@ -97,9 +95,8 @@ void _openMode(String mode) {
           ],
         ),
       ),
-        ),
-      ),
-    );
+    ),
+  );
   }
 
   Widget _buildTopBar() {

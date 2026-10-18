@@ -5307,7 +5307,7 @@ Widget _buildEmptyChat() {
                   width: 48,
                   height: 50,
                   child: IconButton(
-                    tooltip: 'إضافة مرفق',
+                    tooltip: tr('إضافة مرفق', 'Add attachment'),
                     onPressed: _sending ? null : _showAttachmentMenu,
                     icon: Icon(
                       Icons.add_rounded,
@@ -5323,7 +5323,7 @@ Widget _buildEmptyChat() {
                     maxLines: 6,
                     textInputAction: TextInputAction.newline,
                     decoration: InputDecoration(
-                      hintText: 'اكتب رسالتك...',
+                      hintText: tr('اكتب رسالتك...', 'Type your message...'),
                       filled: true,
                       fillColor: Colors.white.withValues(alpha: 0.055),
                       contentPadding: const EdgeInsets.symmetric(

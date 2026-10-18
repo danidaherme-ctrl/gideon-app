@@ -4383,7 +4383,7 @@ Widget _buildEmptyChat() {
     final drawerWidth = math.min(
       MediaQuery.of(context).size.width * 0.82,
       320.0,
-    );
+    ).toDouble();
     return Drawer(
       width: drawerWidth,
       backgroundColor: const Color(0xFF091524),

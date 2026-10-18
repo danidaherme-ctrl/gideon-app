@@ -4363,14 +4363,14 @@ Widget _buildEmptyChat() {
               _deleteConversation(conversation);
             }
           },
-          itemBuilder: (context) => const [
+          itemBuilder: (context) => [
             PopupMenuItem(
               value: 'rename',
-              child: Text(tr('إعادة التسمية', 'Rename')), 
+              child: Text(tr('إعادة التسمية', 'Rename')),
             ),
             PopupMenuItem(
               value: 'delete',
-              child: Text('حذف'),
+              child: Text(tr('حذف', 'Delete')),
             ),
           ],
         ),
@@ -4678,6 +4678,7 @@ Widget _buildEmptyChat() {
       ),
     ),
   );
+  }
 
   Widget _buildAppBarTitle() {
     String title = 'Gideon AI';
